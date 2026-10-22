@@ -9,6 +9,8 @@ import { LiveMap } from "./LiveMap";
 import { EmptyState, Loading } from "./ui";
 import { HelpStrip, MetaCell, PageTitle, StatusPill, TripCard } from "./driver";
 import { employeeService } from "../services/driver";
+import { useAuth } from "../context/AuthContext";
+import { rolePath, segmentTerms } from "../utils/roles";
 import { asDate, clock, longDate, placeName, statusOf, toTime12 } from "../utils/driver";
 import { colors, radius, shadow } from "../theme";
 
@@ -146,6 +148,8 @@ function ScheduledTripCard({ trip, onTrack }) {
 
 export function EmployeeTripsScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const terms = segmentTerms(user?.role);
   const query = useDashboard();
   const [page, setPage] = useState(0);
   const data = query.data?.data;
@@ -166,17 +170,17 @@ export function EmployeeTripsScreen() {
       <View style={styles.info}>
         <Ionicons name="information-circle" size={22} color={colors.teal} />
         <Text style={styles.infoText}>
-          These trips have been scheduled by your company. You are automatically booked on these trips.
+          {`These trips have been scheduled by ${terms.scheduledBy}. You are automatically booked on these trips.`}
         </Text>
       </View>
       {query.isLoading ? (
         <Loading />
       ) : visible.length === 0 ? (
-        <EmptyState icon="calendar-outline" title="No scheduled trips" message="Trips scheduled by your company will appear here." />
+        <EmptyState icon="calendar-outline" title="No scheduled trips" message={`Trips scheduled by ${terms.scheduledBy} will appear here.`} />
       ) : (
         <View style={{ gap: 14 }}>
           {visible.map((t) => (
-            <ScheduledTripCard key={t._id} trip={t} onTrack={() => router.push("/employee/live")} />
+            <ScheduledTripCard key={t._id} trip={t} onTrack={() => router.push(rolePath(user?.role, "live"))} />
           ))}
           <Pager page={page} pages={pages} total={trips.length} onChange={setPage} />
         </View>
@@ -187,6 +191,8 @@ export function EmployeeTripsScreen() {
 
 export function EmployeeHistoryScreen() {
   const query = useDashboard();
+  const { user } = useAuth();
+  const terms = segmentTerms(user?.role);
   const [page, setPage] = useState(0);
   const history = useMemo(
     () => [...(query.data?.data?.travelHistory || [])].sort((a, b) => asDate(tripDateOf(b)) - asDate(tripDateOf(a))),
@@ -197,7 +203,7 @@ export function EmployeeHistoryScreen() {
 
   return (
     <Screen header={<AppHeader />} tabBarSpace refreshing={query.isRefetching} onRefresh={() => query.refetch()}>
-      <PageTitle title="Trip History" subtitle="Review your completed company trips" />
+      <PageTitle title="Trip History" subtitle={`Review your completed ${terms.segment} trips`} />
       {query.isLoading ? (
         <Loading />
       ) : visible.length === 0 ? (
@@ -257,7 +263,9 @@ export function EmployeeTransportScreen() {
   const query = useDashboard();
   const data = query.data?.data;
   const [openId, setOpenId] = useState(null);
-  const company = data?.company?.companyName || data?.company?.businessName || "Company";
+  const { user } = useAuth();
+  const terms = segmentTerms(user?.role);
+  const company = data?.company?.companyName || data?.company?.businessName || data?.company?.fullName || terms.organisation;
 
   const trips = useMemo(
     () =>
@@ -329,6 +337,8 @@ export function EmployeeTransportScreen() {
 
 export function EmployeeLiveScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const terms = segmentTerms(user?.role);
   const query = useQuery({
     queryKey: ["employee", "active-trip"],
     queryFn: () => employeeService.activeTrip(),
@@ -357,7 +367,7 @@ export function EmployeeLiveScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.driverName}>{driverName}</Text>
-                <Text style={styles.driverRole}>Corporate Driver</Text>
+                <Text style={styles.driverRole}>{terms.driverLabel}</Text>
                 <Text style={styles.metaLabel}>
                   {trip.lastPingAt ? `Last update: ${clock(trip.lastPingAt)}` : "Awaiting location"}
                 </Text>

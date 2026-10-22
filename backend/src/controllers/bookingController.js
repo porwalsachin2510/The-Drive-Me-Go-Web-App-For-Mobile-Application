@@ -718,7 +718,7 @@ export const createCorporateBooking = async (req, res) => {
             })
         }
 
-        if (driver.role !== "B2B_PARTNER_DRIVER" && driver.role !== "CORPORATE_DRIVER") {
+        if (!["B2B_PARTNER_DRIVER", "CORPORATE_DRIVER", "SCHOOL_PARTNER_DRIVER", "SCHOOL_CUSTOMER_DRIVER"].includes(driver.role)) {
             return res.status(400).json({
                 success: false,
                 message: "Assigned user is not a corporate driver",

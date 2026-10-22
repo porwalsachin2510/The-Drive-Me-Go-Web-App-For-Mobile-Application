@@ -929,12 +929,12 @@ export const startTrip = async (req, res) => {
             let ownerId = null;
             let ownerType = null;
 
-            if (driverRole === 'B2B_PARTNER_DRIVER') {
+            if (driverRole === 'B2B_PARTNER_DRIVER' || driverRole === 'SCHOOL_PARTNER_DRIVER') {
                 // Owner is the B2B Partner (companyId or the one who created the driver)
                 const driverRecord = await Driver.findOne({ userId: driverId }).select('createdBy partnerId');
                 ownerId = driverRecord?.partnerId || driverRecord?.createdBy || driver?.companyId;
                 ownerType = 'B2B_PARTNER';
-            } else if (driverRole === 'CORPORATE_DRIVER') {
+            } else if (driverRole === 'CORPORATE_DRIVER' || driverRole === 'SCHOOL_CUSTOMER_DRIVER') {
                 // Owner is the Corporate
                 const driverRecord = await Driver.findOne({ userId: driverId }).select('createdBy corporateId');
                 ownerId = driverRecord?.corporateId || driverRecord?.createdBy || driver?.companyId;

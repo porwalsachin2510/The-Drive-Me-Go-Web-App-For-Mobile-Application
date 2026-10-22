@@ -490,14 +490,14 @@ export const searchCommuteRoutes = async (req, res) => {
                             driver = await User.findOne({
                                 driverId: assigned.driverId,
                                 driverModel: "Driver",
-                                role: "B2B_PARTNER_DRIVER"
+                                role: { $in: ["B2B_PARTNER_DRIVER", "SCHOOL_PARTNER_DRIVER"] }
                             }).populate('driverId', 'name email phone')
                         } else if (assigned.driverModel === "CorporateDriver") {
                             // For Corporate Drivers, find User account with driverId reference
                             driver = await User.findOne({
                                 driverId: assigned.driverId,
                                 driverModel: "CorporateDriver",
-                                role: "CORPORATE_DRIVER"
+                                role: { $in: ["CORPORATE_DRIVER", "SCHOOL_CUSTOMER_DRIVER"] }
                             }).populate('driverId', 'name email phone')
                         }
 
