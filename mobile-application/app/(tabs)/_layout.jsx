@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "../../src/context/AuthContext";
 import { MoreSheet } from "../../src/components/MoreSheet";
+import { isPartner } from "../../src/utils/roles";
 import { colors } from "../../src/theme";
 
 const icon = (active, inactive) =>
@@ -14,11 +15,12 @@ const icon = (active, inactive) =>
   };
 
 export default function TabsLayout() {
-  const { ready, isAuthenticated } = useAuth();
+  const { ready, isAuthenticated, user } = useAuth();
   const insets = useSafeAreaInsets();
   const [moreOpen, setMoreOpen] = useState(false);
 
   if (ready && !isAuthenticated) return <Redirect href="/(auth)/login" />;
+  if (ready && isPartner(user)) return <Redirect href="/partner/home" />;
 
   return (
     <>

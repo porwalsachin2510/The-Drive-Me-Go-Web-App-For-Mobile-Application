@@ -4,11 +4,12 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useAuth } from "../src/context/AuthContext";
+import { isPartner } from "../src/utils/roles";
 import { colors } from "../src/theme";
 
 export default function Splash() {
   const router = useRouter();
-  const { ready, isAuthenticated, onboarded } = useAuth();
+  const { ready, isAuthenticated, onboarded, user } = useAuth();
   const progress = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(0)).current;
   const minTimeDone = useRef(false);
@@ -30,12 +31,12 @@ export default function Splash() {
     const timer = setInterval(() => {
       if (!minTimeDone.current) return;
       clearInterval(timer);
-      if (isAuthenticated) router.replace("/(tabs)");
+      if (isAuthenticated) router.replace(isPartner(user) ? "/partner/home" : "/(tabs)");
       else if (!onboarded) router.replace("/onboarding");
       else router.replace("/(auth)/login");
     }, 120);
     return () => clearInterval(timer);
-  }, [ready, isAuthenticated, onboarded, router]);
+  }, [ready, isAuthenticated, onboarded, user, router]);
 
   const width = progress.interpolate({ inputRange: [0, 1], outputRange: ["12%", "100%"] });
 
