@@ -10,6 +10,8 @@ export const partnerService = {
   fleet: () => api.get("/b2c-partner/fleet").then(unwrap),
   deleteVehicle: (id) => api.delete(`/b2c-partner/vehicles/${id}`).then(unwrap),
   setVehicleStatus: (id, status) => api.put(`/b2c-partner/vehicles/${id}/status`, { status }).then(unwrap),
+  setVehicleAvailability: (id, availabilityStatus) =>
+    api.put(`/b2c-partner/vehicles/${id}/status`, { availabilityStatus }).then(unwrap),
   createVehicle: (formData) => api.post("/b2c-partner/vehicles", formData).then(unwrap),
   updateVehicle: (id, formData) => api.put(`/b2c-partner/vehicles/${id}`, formData).then(unwrap),
 
@@ -33,6 +35,7 @@ export const partnerService = {
 
   profile: () => api.get("/b2c-partner/profile").then(unwrap),
   updateProfile: (payload) => api.put("/b2c-partner/profile", payload).then(unwrap),
+  updateProfileImage: (formData) => api.put("/b2c-partner/profile/image", formData).then(unwrap),
 };
 
 export const scheduleService = {

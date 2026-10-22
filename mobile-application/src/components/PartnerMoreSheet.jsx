@@ -7,9 +7,7 @@ const ITEMS = [
   { icon: "star-outline", title: "My Ratings", href: "/partner/ratings" },
   { icon: "pricetag-outline", title: "My Commission", href: "/partner/commission" },
   { icon: "business-outline", title: "Settlements", href: "/partner/settlements" },
-  { icon: "notifications-outline", title: "Notifications", href: "/notifications" },
-  { icon: "settings-outline", title: "Settings", href: "/settings" },
-  { icon: "person-circle-outline", title: "Account", href: "/profile" },
+  { icon: "person-circle-outline", title: "Account", href: "/partner/account" },
 ];
 
 export function PartnerMoreSheet({ visible, onClose }) {

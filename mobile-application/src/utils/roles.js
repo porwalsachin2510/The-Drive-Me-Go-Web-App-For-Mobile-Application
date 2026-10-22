@@ -5,4 +5,4 @@ export const ROLES = {
 
 export const isPartner = (user) => user?.role === ROLES.B2C_PARTNER;
 
-export const homeHref = (user) => (isPartner(user) ? "/(partner)" : "/(tabs)");
+export const homeHref = (user) => (isPartner(user) ? "/partner/home" : "/(tabs)");

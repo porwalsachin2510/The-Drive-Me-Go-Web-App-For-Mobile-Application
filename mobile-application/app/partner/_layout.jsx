@@ -24,6 +24,7 @@ const HIDDEN = [
   "ratings",
   "commission",
   "settlements",
+  "account",
 ];
 
 export default function PartnerLayout() {
