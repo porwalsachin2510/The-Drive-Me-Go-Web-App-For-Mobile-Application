@@ -11,13 +11,13 @@ import { LiveMap } from "./LiveMap";
 import { useAuth } from "../context/AuthContext";
 import { useLocationSharing } from "../context/LocationContext";
 import { b2cDriverService, managedDriverService } from "../services/driver";
-import { ROLES } from "../utils/roles";
+import { ROLES, segmentTerms } from "../utils/roles";
 import { clock, placeName } from "../utils/driver";
 import { colors, radius } from "../theme";
 
-const POINTS = [
+const pointsFor = (terms) => [
   "Your location is shared automatically when you have active trips",
-  "Employees can track your real-time location",
+  `${terms.passengers} can track your real-time location`,
   "Location updates every 5 seconds for accurate tracking",
   "Location sharing stops automatically when all trips are completed",
 ];
@@ -45,6 +45,7 @@ export function DriverLiveScreen({ variant, liveHref, onBack, tripsHref }) {
   const { user } = useAuth();
   const { sharing, coords, lastUpdated, error, start, stop, setActiveTripId } = useLocationSharing();
   const isB2C = user?.role === ROLES.B2C_PARTNER_DRIVER;
+  const points = pointsFor(segmentTerms(user?.role));
 
   const active = useQuery({
     queryKey: ["driver", "active-trip", user?.role],
@@ -171,7 +172,7 @@ export function DriverLiveScreen({ variant, liveHref, onBack, tripsHref }) {
               </View>
               <Text style={styles.howTitle}>How Location Sharing Works</Text>
             </View>
-            {POINTS.map((p) => (
+            {points.map((p) => (
               <View key={p} style={styles.point}>
                 <View style={styles.bullet} />
                 <Text style={styles.pointText}>{p}</Text>

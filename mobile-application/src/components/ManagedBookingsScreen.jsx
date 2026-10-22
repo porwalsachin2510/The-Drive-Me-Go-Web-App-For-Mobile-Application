@@ -29,6 +29,7 @@ import {
   shortDate,
   statusOf,
 } from "../utils/driver";
+import { segmentTerms } from "../utils/roles";
 import { colors, radius } from "../theme";
 
 const GROUPS = {
@@ -48,13 +49,15 @@ const STATUS_META = {
   CANCELLED: { label: "Cancelled", tone: "danger" },
 };
 
-function PassengerBlock({ booking, corporate }) {
+function PassengerBlock({ booking, corporate, terms }) {
   const list = booking.passengers || [];
   if (list.length === 0) return null;
   const first = list[0] || {};
+  const school = terms.segment === "school";
+  const label = school ? `${terms.passengers} to Pickup:` : "Passengers to Pickup:";
   return (
     <View style={styles.passengerBox}>
-      <Text style={styles.boxLabel}>{corporate ? "PASSENGERS:" : "Passengers to Pickup:"}</Text>
+      <Text style={styles.boxLabel}>{corporate ? (school ? `${terms.passengers.toUpperCase()}:` : "PASSENGERS:") : label}</Text>
       {list.map((p, i) => (
         <View key={p._id || i} style={corporate ? styles.nameChip : undefined}>
           {corporate ? <Ionicons name="person-outline" size={14} color={colors.navy} /> : null}
@@ -71,7 +74,7 @@ function PassengerBlock({ booking, corporate }) {
   );
 }
 
-function BookingCard({ booking, corporate, busyId, onStart, onComplete, onLive, expanded, onToggle }) {
+function BookingCard({ booking, corporate, terms, busyId, onStart, onComplete, onLive, expanded, onToggle }) {
   const status = statusOf(booking);
   const meta = STATUS_META[status] || { label: status || "Pending", tone: "muted" };
   const { from, to } = bookingRoute(booking);
@@ -101,12 +104,12 @@ function BookingCard({ booking, corporate, busyId, onStart, onComplete, onLive, 
         <View style={styles.vDivider} />
         <MetaCell icon="time-outline" label="Time" value={bookingTime(booking)} />
         <View style={styles.vDivider} />
-        <MetaCell icon="person-outline" label="Passengers" value={String(passengerCountOf(booking))} />
+        <MetaCell icon="person-outline" label={terms.passengers === "Students" ? "Students" : "Passengers"} value={String(passengerCountOf(booking))} />
       </View>
 
       {showDetails ? (
         <>
-          <PassengerBlock booking={booking} corporate={corporate} />
+          <PassengerBlock booking={booking} corporate={corporate} terms={terms} />
           {corporate ? (
             <View style={styles.pointsBox}>
               <View style={styles.point}>
@@ -167,7 +170,8 @@ function BookingCard({ booking, corporate, busyId, onStart, onComplete, onLive, 
 export function ManagedBookingsScreen({ kind, liveHref }) {
   const router = useRouter();
   const qc = useQueryClient();
-  const { userId } = useAuth();
+  const { userId, user } = useAuth();
+  const terms = segmentTerms(user?.role);
   const { start: startSharing, stop: stopSharing, sharing } = useLocationSharing();
   const corporate = kind === "corporate";
   const [tab, setTab] = useState("confirmed");
@@ -260,7 +264,7 @@ export function ManagedBookingsScreen({ kind, liveHref }) {
     <Screen header={<AppHeader />} tabBarSpace refreshing={query.isRefetching} onRefresh={() => query.refetch()}>
       <DriverBanner liveHref={liveHref} />
       <View style={{ height: 6 }} />
-      <PageTitle title="My Bookings" subtitle={corporate ? "Manage your scheduled passenger trips." : undefined} />
+      <PageTitle title="My Bookings" subtitle={corporate ? `Manage your scheduled ${terms.passenger.toLowerCase()} trips.` : undefined} />
       <View style={{ marginBottom: 14 }}>
         <SegmentTabs value={tab} onChange={setTab} items={tabs} />
       </View>
@@ -276,6 +280,7 @@ export function ManagedBookingsScreen({ kind, liveHref }) {
               key={b._id}
               booking={b}
               corporate={corporate}
+              terms={terms}
               busyId={busyId}
               expanded={expandedId === b._id}
               onToggle={() => setExpandedId(expandedId === b._id ? null : b._id)}
