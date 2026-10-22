@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "../../src/context/AuthContext";
 import { PartnerMoreSheet } from "../../src/components/PartnerMoreSheet";
-import { isPartner } from "../../src/utils/roles";
+import { isPartner, homeHref } from "../../src/utils/roles";
 import { colors } from "../../src/theme";
 
 const icon = (active, inactive) =>
@@ -33,7 +33,7 @@ export default function PartnerLayout() {
   const [moreOpen, setMoreOpen] = useState(false);
 
   if (ready && !isAuthenticated) return <Redirect href="/(auth)/login" />;
-  if (ready && user && !isPartner(user)) return <Redirect href="/(tabs)" />;
+  if (ready && user && !isPartner(user)) return <Redirect href={homeHref(user)} />;
 
   return (
     <>

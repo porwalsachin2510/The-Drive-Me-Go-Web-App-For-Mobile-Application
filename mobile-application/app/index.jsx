@@ -4,7 +4,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useAuth } from "../src/context/AuthContext";
-import { isPartner } from "../src/utils/roles";
+import { homeHref } from "../src/utils/roles";
 import { colors } from "../src/theme";
 
 export default function Splash() {
@@ -31,7 +31,7 @@ export default function Splash() {
     const timer = setInterval(() => {
       if (!minTimeDone.current) return;
       clearInterval(timer);
-      if (isAuthenticated) router.replace(isPartner(user) ? "/partner/home" : "/(tabs)");
+      if (isAuthenticated) router.replace(homeHref(user));
       else if (!onboarded) router.replace("/onboarding");
       else router.replace("/(auth)/login");
     }, 120);

@@ -1,0 +1,36 @@
+import api from "../api/client";
+
+const unwrap = (res) => res.data;
+
+export const b2cDriverService = {
+  bookings: (status) =>
+    api.get("/b2c-bookings/driver/bookings", { params: status ? { status } : undefined }).then(unwrap),
+  trips: (filter = "today") => api.get("/b2c-daily-trips/driver/trips", { params: { filter } }).then(unwrap),
+  startTrip: (tripId) => api.put(`/b2c-daily-trips/driver/start/${tripId}`).then(unwrap),
+  completeTrip: (tripId) => api.put(`/b2c-daily-trips/driver/complete/${tripId}`).then(unwrap),
+  availability: () => api.get("/b2c-daily-trips/driver/availability").then(unwrap),
+  setAvailability: (status) => api.put("/b2c-daily-trips/driver/availability/status", { status }).then(unwrap),
+  ratings: () => api.get("/travel-history/driver-ratings").then(unwrap),
+  updateLocation: (payload) => api.post("/b2c-daily-trips/driver/update-location", payload).then(unwrap),
+};
+
+const bookingBase = (kind) => (kind === "corporate" ? "/bookings/corporate" : "/bookings/b2b-partner");
+
+export const managedDriverService = {
+  bookings: (kind, userId) =>
+    api
+      .get(kind === "corporate" ? `/bookings/corporate/driver/${userId}` : `/bookings/b2b-partner/driver/${userId}`)
+      .then(unwrap),
+  startTrip: (kind, bookingId, mergedTripIds = []) =>
+    api.put(`${bookingBase(kind)}/${bookingId}/start`, { mergedTripIds }).then(unwrap),
+  completeTrip: (kind, bookingId, mergedTripIds = []) =>
+    api.put(`${bookingBase(kind)}/${bookingId}/complete`, { mergedTripIds }).then(unwrap),
+  activeTrip: () => api.get("/driver/active-trip").then(unwrap),
+  updateLocation: (payload) => api.post("/driver/update-location", payload).then(unwrap),
+};
+
+export const employeeService = {
+  dashboard: () => api.get("/corporate-employee-users/dashboard").then(unwrap),
+  history: (params) => api.get("/travel-history/my-history", { params }).then(unwrap),
+  activeTrip: (coords) => api.get("/trips/my-active-trip", { params: coords || {} }).then(unwrap),
+};
