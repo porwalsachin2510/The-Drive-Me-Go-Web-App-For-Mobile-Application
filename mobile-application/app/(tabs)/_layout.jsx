@@ -1,11 +1,9 @@
-import { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
 import { Redirect, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { useAuth } from "../../src/context/AuthContext";
-import { MoreSheet } from "../../src/components/MoreSheet";
 import { homeHref } from "../../src/utils/roles";
 import { colors } from "../../src/theme";
 
@@ -17,7 +15,6 @@ const icon = (active, inactive) =>
 export default function TabsLayout() {
   const { ready, isAuthenticated, user } = useAuth();
   const insets = useSafeAreaInsets();
-  const [moreOpen, setMoreOpen] = useState(false);
 
   if (ready && !isAuthenticated) return <Redirect href="/(auth)/login" />;
   if (ready && user && user.role !== "COMMUTER") return <Redirect href={homeHref(user)} />;
@@ -52,18 +49,8 @@ export default function TabsLayout() {
         <Tabs.Screen name="routes" options={{ title: "Routes", tabBarIcon: icon("location", "location-outline") }} />
         <Tabs.Screen name="trips" options={{ title: "Trips", tabBarIcon: icon("calendar", "calendar-outline") }} />
         <Tabs.Screen name="wallet" options={{ title: "Wallet", tabBarIcon: icon("wallet", "wallet-outline") }} />
-        <Tabs.Screen
-          name="more"
-          options={{ title: "More", tabBarIcon: icon("menu", "menu-outline") }}
-          listeners={{
-            tabPress: (e) => {
-              e.preventDefault();
-              setMoreOpen(true);
-            },
-          }}
-        />
+        <Tabs.Screen name="more" options={{ title: "More", tabBarIcon: icon("menu", "menu-outline") }} />
       </Tabs>
-      <MoreSheet visible={moreOpen} onClose={() => setMoreOpen(false)} />
     </>
   );
 }

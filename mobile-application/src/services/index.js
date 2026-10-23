@@ -71,4 +71,13 @@ export const routeRequestService = {
 export const profileService = {
   get: () => api.get("/commuter/profile").then(unwrap),
   update: (payload) => api.put("/commuter/profile", payload).then(unwrap),
+  changePassword: (currentPassword, newPassword) =>
+    api.put("/commuter/change-password", { currentPassword, newPassword }).then(unwrap),
+};
+
+export const subscriptionService = {
+  settings: () => api.get("/subscription-settings/settings").then(unwrap),
+  update: (payload) => api.put("/subscription-settings/settings", payload).then(unwrap),
+  cancel: (payload) => api.post("/subscription-settings/cancel", payload).then(unwrap),
+  renew: (payload) => api.post("/subscription-settings/renew", payload).then(unwrap),
 };
