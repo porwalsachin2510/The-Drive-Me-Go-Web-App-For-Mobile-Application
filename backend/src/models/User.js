@@ -47,6 +47,20 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        // City the user browses services in (always within their own country).
+        preferredCity: {
+            type: String,
+            trim: true,
+            default: null,
+        },
+        // Shareable code friends enter to credit this user as their referrer.
+        referralCode: {
+            type: String,
+            unique: true,
+            sparse: true,
+            uppercase: true,
+            trim: true,
+        },
         country: {
             type: String,
             enum: ["UAE", "KW", "SA", "BH", "OM", "QA"],

@@ -62,6 +62,7 @@ import sosRoutes from "./routes/sosRoutes.js"
 import demandRoutes from "./routes/demandRoutes.js"
 import demandPortalRoutes from "./routes/demandPortalRoutes.js"
 import importExportRoutes from "./routes/importExportRoutes.js"
+import engagementRoutes from "./routes/engagementRoutes.js"
 import { seedDropdownOptions } from "./controllers/dropdownController.js"
 // import { dailyTripGeneration, frequentTripGeneration, hourlyTripGeneration, runImmediateGeneration, corporateTripGeneration } from "./cron/tripGenerationCron.js"
 import { processDailyRenewals, sendDailyRenewalReminders } from "./cron/subscriptionCron.js"
@@ -860,6 +861,7 @@ app.use("/api/sos", sosRoutes)
 app.use("/api/demand", demandRoutes)
 app.use("/api/demand-portal", demandPortalRoutes)
 app.use("/api/import-export", importExportRoutes)
+app.use("/api/engagement", engagementRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {

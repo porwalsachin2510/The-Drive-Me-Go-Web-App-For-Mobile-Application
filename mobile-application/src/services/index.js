@@ -81,3 +81,31 @@ export const subscriptionService = {
   cancel: (payload) => api.post("/subscription-settings/cancel", payload).then(unwrap),
   renew: (payload) => api.post("/subscription-settings/renew", payload).then(unwrap),
 };
+
+export const engagementService = {
+  city: () => api.get("/engagement/city").then(unwrap),
+  setCity: (city) => api.put("/engagement/city", { city }).then(unwrap),
+
+  contacts: () => api.get("/engagement/emergency-contacts").then(unwrap),
+  createContact: (payload) => api.post("/engagement/emergency-contacts", payload).then(unwrap),
+  updateContact: (id, payload) => api.put(`/engagement/emergency-contacts/${id}`, payload).then(unwrap),
+  deleteContact: (id) => api.delete(`/engagement/emergency-contacts/${id}`).then(unwrap),
+
+  submitFeedback: (payload) => api.post("/engagement/feedback", payload).then(unwrap),
+  myFeedback: (params) => api.get("/engagement/feedback/mine", { params }).then(unwrap),
+
+  faqs: (params) => api.get("/engagement/faqs", { params }).then(unwrap),
+
+  posts: (params) => api.get("/engagement/posts", { params }).then(unwrap),
+  post: (idOrSlug) => api.get(`/engagement/posts/${idOrSlug}`).then(unwrap),
+
+  contests: () => api.get("/engagement/contests").then(unwrap),
+  joinContest: (id, payload) => api.post(`/engagement/contests/${id}/join`, payload).then(unwrap),
+
+  referrals: () => api.get("/engagement/referrals").then(unwrap),
+  applyReferral: (code) => api.post("/engagement/referrals/apply", { code }).then(unwrap),
+
+  protection: () => api.get("/engagement/trip-protection").then(unwrap),
+  buyProtection: (payload) => api.post("/engagement/trip-protection", payload).then(unwrap),
+  claimProtection: (id, reason) => api.post(`/engagement/trip-protection/${id}/claim`, { reason }).then(unwrap),
+};

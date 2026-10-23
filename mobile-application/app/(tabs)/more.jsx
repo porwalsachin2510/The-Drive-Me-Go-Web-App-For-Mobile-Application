@@ -1,6 +1,9 @@
+import { useCallback, useState } from "react";
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { CitySheet } from "../../src/components/CitySheet";
+import { engagementService } from "../../src/services";
 import { Ionicons } from "@expo/vector-icons";
 import * as WebBrowser from "expo-web-browser";
 import { Screen } from "../../src/components/Screen";
@@ -41,6 +44,21 @@ export default function MoreTab() {
   const router = useRouter();
   const { user, logout } = useAuth();
   const avatar = resolveImage(user?.profileImage);
+  const [cityInfo, setCityInfo] = useState(null);
+  const [cityOpen, setCityOpen] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      engagementService
+        .city()
+        .then((res) => setCityInfo(res?.data || null))
+        .catch(() => setCityInfo(null));
+    }, [])
+  );
+
+  const cityLabel = cityInfo?.selected
+    ? `${cityInfo.selected}, ${cityInfo.countryName}`
+    : COUNTRIES[user?.country] || user?.country || "Dubai, UAE";
 
   const confirmLogout = () =>
     Alert.alert("Log out", "Are you sure you want to log out?", [
@@ -78,9 +96,9 @@ export default function MoreTab() {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={type.small}>Current City</Text>
-          <Text style={type.h3}>{COUNTRIES[user?.country] || user?.country || "Dubai, UAE"}</Text>
+          <Text style={type.h3}>{cityLabel}</Text>
         </View>
-        <Pressable onPress={() => router.push("/(tabs)/routes")} style={styles.change} accessibilityRole="button">
+        <Pressable onPress={() => cityInfo && setCityOpen(true)} style={styles.change} accessibilityRole="button" accessibilityLabel="Change city">
           <Text style={styles.changeText}>Change</Text>
           <Ionicons name="chevron-forward" size={14} color={colors.tealDark} />
         </Pressable>
@@ -96,6 +114,16 @@ export default function MoreTab() {
       </Card>
 
       <Card style={styles.group}>
+        <Row icon="person-add-outline" title="Refer a Friend" sub="Get rewards for every referral" onPress={() => router.push("/refer")} />
+        <Row icon="shield-checkmark-outline" title="Secure your trip" sub="Travel protection and flexible cancellation" onPress={() => router.push("/secure-trip")} />
+        <Row icon="call-outline" title="Emergency Contacts" sub="Instant alerts for your saved contacts" onPress={() => router.push("/emergency-contacts")} />
+        <Row icon="newspaper-outline" title="News & Blog" sub="Latest updates and travel tips" onPress={() => router.push("/news")} />
+        <Row icon="trophy-outline" title="Contests" sub="Win exciting rewards" onPress={() => router.push("/contests")} />
+        <Row icon="create-outline" title="Write Feedback" sub="Help us serve you better" onPress={() => router.push("/feedback")} />
+        <Row icon="help-circle-outline" title="FAQs" sub="Find answers to common questions" onPress={() => router.push("/faqs")} last />
+      </Card>
+
+      <Card style={styles.group}>
         <Row icon="document-text-outline" title="Terms & Conditions" sub="Read our terms and conditions" onPress={() => openWeb("/terms-and-conditions")} />
         <Row icon="shield-checkmark-outline" title="Privacy Policy" sub="Your data, our priority" onPress={() => openWeb("/privacy-policy")} />
         <Row icon="information-circle-outline" title="About Us" sub="Know more about DriveMeGo" onPress={() => openWeb("/about-us")} />
@@ -105,6 +133,17 @@ export default function MoreTab() {
       <Card style={styles.group}>
         <Row icon="log-out-outline" title="Log out" onPress={confirmLogout} danger last />
       </Card>
+
+      {cityInfo ? (
+        <CitySheet
+          visible={cityOpen}
+          onClose={() => setCityOpen(false)}
+          countryName={cityInfo.countryName}
+          cities={cityInfo.cities}
+          selected={cityInfo.selected}
+          onChanged={(selected) => setCityInfo((prev) => ({ ...prev, selected }))}
+        />
+      ) : null}
     </Screen>
   );
 }
