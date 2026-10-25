@@ -9,6 +9,7 @@ import { LiveMap } from "./LiveMap";
 import { EmptyState, Loading } from "./ui";
 import { HelpStrip, MetaCell, PageTitle, StatusPill, TripCard } from "./driver";
 import { employeeService } from "../services/driver";
+import { CancelTripButton, PassengerQuickActions } from "./PassengerActionScreens";
 import { useAuth } from "../context/AuthContext";
 import { rolePath, segmentTerms } from "../utils/roles";
 import { asDate, clock, longDate, placeName, statusOf, toTime12 } from "../utils/driver";
@@ -278,6 +279,7 @@ export function EmployeeTransportScreen() {
   return (
     <Screen header={<AppHeader onBack={() => router.back()} />} tabBarSpace refreshing={query.isRefetching} onRefresh={() => query.refetch()}>
       <PageTitle title="Transport Info" subtitle="View your transport details and trip information" />
+      <PassengerQuickActions basePath={rolePath(user?.role, "").replace(/\/$/, "")} />
       {query.isLoading ? (
         <Loading />
       ) : trips.length === 0 ? (
@@ -323,6 +325,7 @@ export function EmployeeTransportScreen() {
                         <StatusPill label="PAID" tone="success" dot={false} />
                       </View>
                     </View>
+                    <CancelTripButton trip={t} />
                   </>
                 ) : null}
               </TripCard>

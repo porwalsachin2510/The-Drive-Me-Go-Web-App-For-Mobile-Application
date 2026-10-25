@@ -235,6 +235,22 @@ const corporateEmployeeSchema = new mongoose.Schema(
                 default: false,
             },
         }],
+        // Passenger-raised route / pickup change requests
+        routeChangeRequests: [{
+            reason: { type: String, required: true },
+            preferredRoute: { type: String, default: "" },
+            newPickupPoint: { type: String, default: "" },
+            newDropOffPoint: { type: String, default: "" },
+            effectiveDate: { type: Date, default: null },
+            status: {
+                type: String,
+                enum: ["PENDING", "APPROVED", "REJECTED", "CANCELLED"],
+                default: "PENDING",
+            },
+            responseNote: { type: String, default: "" },
+            requestedAt: { type: Date, default: Date.now },
+            resolvedAt: { type: Date, default: null },
+        }],
         // Document verification
         documents: {
             employeeIdCard: String,

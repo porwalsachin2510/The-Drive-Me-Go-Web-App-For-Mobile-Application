@@ -12,6 +12,17 @@ import { sendEmail } from "../Services/emailService.js";
 import { passengerRoleForOwner, CUSTOMER_ROLES } from "../utils/roleFamilies.js";
 
 // Register corporate employee
+// Trip passenger rows reference the passenger either by login (passengerId) or
+// by the CorporateEmployee document (employeeId); legacy rows put the login id in employeeId.
+const isMyPassenger = (p, userId, employee) => {
+    if (!p) return false;
+    const uid = String(userId);
+    const eid = employee?._id ? String(employee._id) : null;
+    const pid = p.passengerId ? String(p.passengerId) : null;
+    const emp = p.employeeId ? String(p.employeeId) : null;
+    return pid === uid || emp === uid || (eid && emp === eid);
+};
+
 export const registerCorporateEmployee = async (req, res) => {
     try {
         const {
@@ -558,8 +569,8 @@ export const manageBooking = async (req, res) => {
             }
 
             // Find and remove passenger
-            const passengerIndex = trip.passengers.findIndex(p =>
-                p.employeeId && p.employeeId.toString() === userId.toString()
+            const passengerIndex = (trip.passengers || []).findIndex(p =>
+                isMyPassenger(p, userId, employee)
             );
 
             if (passengerIndex === -1) {
@@ -668,11 +679,12 @@ export const markNotTravelingToday = async (req, res) => {
         let cancelCount = 0;
         for (const trip of todayTrips) {
             // Check if employee is a passenger
-            const passengerIdx = trip.passengers?.findIndex(p =>
-                p.employeeId && p.employeeId.toString() === userId.toString()
+            const passengerIdx = (trip.passengers || []).findIndex(p =>
+                isMyPassenger(p, userId, employee)
             );
 
             if (passengerIdx >= 0) {
+                if (trip.passengers[passengerIdx].bookingStatus === 'NO_SHOW') continue;
                 trip.passengers[passengerIdx].bookingStatus = 'NO_SHOW';
                 await trip.save();
                 cancelCount++;
@@ -797,8 +809,8 @@ export const rateTrip = async (req, res) => {
         }
 
         // Get seat number from passenger entry
-        const passengerEntry = trip.passengers?.find(p =>
-            p.employeeId && p.employeeId.toString() === userId.toString()
+        const passengerEntry = (trip.passengers || []).find(p =>
+            isMyPassenger(p, userId, employee)
         );
         seatNumber = passengerEntry?.seatNumber || passengerEntry?.seat || null;
 
@@ -904,7 +916,15 @@ export const rateTrip = async (req, res) => {
 export const requestRouteChange = async (req, res) => {
     try {
         const userId = req.userId;
-        const { currentRouteId, newRouteId, reason, effectiveDate } = req.body;
+        const { reason, preferredRoute, newRouteId, newPickupPoint, newDropOffPoint, effectiveDate } = req.body;
+
+        const cleanReason = String(reason || "").trim();
+        if (!cleanReason) {
+            return res.status(400).json({ success: false, message: "Reason for change is required" });
+        }
+        if (cleanReason.length > 1000) {
+            return res.status(400).json({ success: false, message: "Reason is too long (max 1000 characters)" });
+        }
 
         const employee = await CorporateEmployee.findOne({ userId });
 
@@ -915,27 +935,36 @@ export const requestRouteChange = async (req, res) => {
             });
         }
 
-        // Create route change request
+        const pending = (employee.routeChangeRequests || []).filter(r => r.status === "PENDING").length;
+        if (pending >= 3) {
+            return res.status(400).json({
+                success: false,
+                message: "You already have pending route change requests. Please wait for them to be reviewed."
+            });
+        }
+
+        const parsedDate = effectiveDate ? new Date(effectiveDate) : null;
         const changeRequest = {
-            employeeId: employee._id,
-            currentRouteId,
-            newRouteId,
-            reason,
-            effectiveDate: new Date(effectiveDate),
+            reason: cleanReason,
+            preferredRoute: String(preferredRoute || newRouteId || "").trim().slice(0, 200),
+            newPickupPoint: String(newPickupPoint || "").trim().slice(0, 200),
+            newDropOffPoint: String(newDropOffPoint || "").trim().slice(0, 200),
+            effectiveDate: parsedDate && !isNaN(parsedDate) ? parsedDate : null,
             status: "PENDING",
             requestedAt: new Date()
         };
 
-        // This would integrate with a RouteChangeRequest model
-        // For now, just return success
+        if (!employee.routeChangeRequests) employee.routeChangeRequests = [];
+        employee.routeChangeRequests.push(changeRequest);
+        await employee.save();
+        const saved = employee.routeChangeRequests[employee.routeChangeRequests.length - 1];
 
-        // Notify manager
         await notifyManagerOfRouteChange(employee, changeRequest);
 
         res.status(201).json({
             success: true,
             message: "Route change request submitted",
-            data: changeRequest
+            data: saved
         });
 
     } catch (error) {
@@ -945,6 +974,47 @@ export const requestRouteChange = async (req, res) => {
             message: "Error requesting route change",
             error: error.message
         });
+    }
+};
+
+// List my route change requests
+export const getMyRouteChangeRequests = async (req, res) => {
+    try {
+        const employee = await CorporateEmployee.findOne({ userId: req.userId }).select("routeChangeRequests");
+        if (!employee) {
+            return res.status(404).json({ success: false, message: "Employee not found" });
+        }
+        const requests = [...(employee.routeChangeRequests || [])].sort(
+            (a, b) => new Date(b.requestedAt) - new Date(a.requestedAt)
+        );
+        res.status(200).json({ success: true, data: requests });
+    } catch (error) {
+        console.error("Error listing route change requests:", error);
+        res.status(500).json({ success: false, message: "Error retrieving route change requests" });
+    }
+};
+
+// Withdraw a pending route change request
+export const cancelRouteChangeRequest = async (req, res) => {
+    try {
+        const employee = await CorporateEmployee.findOne({ userId: req.userId });
+        if (!employee) {
+            return res.status(404).json({ success: false, message: "Employee not found" });
+        }
+        const request = employee.routeChangeRequests?.id(req.params.requestId);
+        if (!request) {
+            return res.status(404).json({ success: false, message: "Request not found" });
+        }
+        if (request.status !== "PENDING") {
+            return res.status(400).json({ success: false, message: "Only pending requests can be withdrawn" });
+        }
+        request.status = "CANCELLED";
+        request.resolvedAt = new Date();
+        await employee.save();
+        res.status(200).json({ success: true, message: "Request withdrawn", data: request });
+    } catch (error) {
+        console.error("Error cancelling route change request:", error);
+        res.status(500).json({ success: false, message: "Error withdrawing request" });
     }
 };
 

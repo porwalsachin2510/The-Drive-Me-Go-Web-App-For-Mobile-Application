@@ -33,4 +33,19 @@ export const employeeService = {
   dashboard: () => api.get("/corporate-employee-users/dashboard").then(unwrap),
   history: (params) => api.get("/travel-history/my-history", { params }).then(unwrap),
   activeTrip: (coords) => api.get("/trips/my-active-trip", { params: coords || {} }).then(unwrap),
+  cancelTrip: (tripId, reason) =>
+    api.post("/corporate-employee-users/booking", { action: "CANCEL", tripId, reason }).then(unwrap),
+  notTravelingToday: (reason) =>
+    api.post("/corporate-employee-users/not-traveling-today", { date: new Date().toISOString(), reason }).then(unwrap),
+  rateTrip: (payload) => api.post("/corporate-employee-users/rate-trip", payload).then(unwrap),
+  routeChangeRequests: () => api.get("/corporate-employee-users/route-change-requests").then(unwrap),
+  requestRouteChange: (payload) => api.post("/corporate-employee-users/request-route-change", payload).then(unwrap),
+  cancelRouteChange: (id) => api.patch(`/corporate-employee-users/route-change-requests/${id}/cancel`).then(unwrap),
+};
+
+export const sosService = {
+  myAlerts: () => api.get("/sos/my-alerts").then(unwrap),
+  myActive: () => api.get("/sos/my-active").then(unwrap),
+  raise: (payload) => api.post("/sos/raise", payload).then(unwrap),
+  cancel: (id) => api.patch(`/sos/${id}/cancel`, { note: "Cancelled by passenger (false alarm)" }).then(unwrap),
 };

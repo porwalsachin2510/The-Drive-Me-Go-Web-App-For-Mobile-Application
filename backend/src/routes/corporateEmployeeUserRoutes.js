@@ -8,6 +8,8 @@ import {
     markNotTravelingToday,
     rateTrip,
     requestRouteChange,
+    getMyRouteChangeRequests,
+    cancelRouteChangeRequest,
     getEmployeeMonthlyPasses
 } from "../controllers/corporateEmployeeUserController.js";
 
@@ -26,5 +28,7 @@ router.post("/not-traveling-today", verifyToken, markNotTravelingToday);
 // Feedback and requests
 router.post("/rate-trip", verifyToken, rateTrip);
 router.post("/request-route-change", verifyToken, requestRouteChange);
+router.get("/route-change-requests", verifyToken, getMyRouteChangeRequests);
+router.patch("/route-change-requests/:requestId/cancel", verifyToken, cancelRouteChangeRequest);
 
 export default router;
