@@ -10,6 +10,8 @@ export const b2cDriverService = {
   completeTrip: (tripId) => api.put(`/b2c-daily-trips/driver/complete/${tripId}`).then(unwrap),
   availability: () => api.get("/b2c-daily-trips/driver/availability").then(unwrap),
   setAvailability: (status) => api.put("/b2c-daily-trips/driver/availability/status", { status }).then(unwrap),
+  availabilityDetailed: () => api.get("/b2c-daily-trips/driver/availability/detailed").then(unwrap),
+  checkAvailability: () => api.get("/b2c-daily-trips/driver/check-availability").then(unwrap),
   ratings: () => api.get("/travel-history/driver-ratings").then(unwrap),
   updateLocation: (payload) => api.post("/b2c-daily-trips/driver/update-location", payload).then(unwrap),
 };
@@ -41,6 +43,14 @@ export const employeeService = {
   routeChangeRequests: () => api.get("/corporate-employee-users/route-change-requests").then(unwrap),
   requestRouteChange: (payload) => api.post("/corporate-employee-users/request-route-change", payload).then(unwrap),
   cancelRouteChange: (id) => api.patch(`/corporate-employee-users/route-change-requests/${id}/cancel`).then(unwrap),
+};
+
+export const noShowService = {
+  mine: (params) => api.get("/no-show/my-no-shows", { params }).then(unwrap),
+  notTraveling: ({ reason, notes }) =>
+    api
+      .post("/corporate-employee-users/not-traveling-today", { date: new Date().toISOString(), reason, notes })
+      .then(unwrap),
 };
 
 export const sosService = {

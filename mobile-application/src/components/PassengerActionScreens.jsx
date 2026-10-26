@@ -359,6 +359,7 @@ export function PassengerQuickActions({ basePath }) {
     { icon: "star-outline", label: "Rate Trips", onPress: () => router.push(`${basePath}/feedback`), tone: colors.tealDark },
     { icon: "git-compare-outline", label: "Route Change", onPress: () => router.push(`${basePath}/route-change`), tone: colors.info },
     { icon: "warning-outline", label: "Emergency SOS", onPress: () => router.push(`${basePath}/sos`), tone: colors.danger },
+    { icon: "document-text-outline", label: "No-Show History", onPress: () => router.push(`${basePath}/no-shows`), tone: colors.navy },
   ];
 
   return (

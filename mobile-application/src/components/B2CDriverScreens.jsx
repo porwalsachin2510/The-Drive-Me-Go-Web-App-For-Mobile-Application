@@ -7,6 +7,7 @@ import { AppHeader } from "./AppHeader";
 import { EmptyState, Loading } from "./ui";
 import { DriverBanner, GradientAction, HelpStrip, MetaCell, PageTitle, SegmentTabs, StatusPill, TripCard } from "./driver";
 import { useLocationSharing } from "../context/LocationContext";
+import { DriverAvailabilityCard } from "./DriverAvailability";
 import { b2cDriverService } from "../services/driver";
 import { bookingDate, bookingRoute, longDate, passengerName, placeName, shortDate, statusOf, toTime12 } from "../utils/driver";
 import { colors, radius, shadow } from "../theme";
@@ -66,6 +67,7 @@ export function B2CBookingsScreen() {
   return (
     <Screen header={<AppHeader />} tabBarSpace refreshing={query.isRefetching} onRefresh={() => query.refetch()}>
       <DriverBanner liveHref={LIVE_HREF} />
+      <DriverAvailabilityCard />
       <PageTitle title="My Bookings" subtitle="Passengers booked on your routes." />
       <View style={{ marginBottom: 14 }}>
         <SegmentTabs
@@ -178,6 +180,7 @@ export function B2CDailyTripsScreen() {
   return (
     <Screen header={<AppHeader />} tabBarSpace refreshing={query.isRefetching} onRefresh={() => query.refetch()}>
       <DriverBanner liveHref={LIVE_HREF} />
+      <DriverAvailabilityCard />
       <PageTitle title="Daily Trips" subtitle="Start and complete your assigned trips." />
       <View style={{ marginBottom: 14 }}>
         <SegmentTabs
