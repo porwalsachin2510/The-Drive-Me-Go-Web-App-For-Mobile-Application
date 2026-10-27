@@ -77,8 +77,4 @@ export const ratingsService = {
   driverRatings: (params) => api.get("/travel-history/driver-ratings", { params }).then(unwrap),
 };
 
-export const settingsService = {
-  get: () => api.get("/settings").then(unwrap),
-  update: (payload) => api.put("/settings", payload).then(unwrap),
-  changePassword: (payload) => api.put("/settings/change-password", payload).then(unwrap),
-};
+

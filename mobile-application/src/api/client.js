@@ -8,6 +8,8 @@ export const setAuthToken = (token) => {
   authToken = token;
 };
 
+export const getAuthToken = () => authToken;
+
 export const onUnauthorized = (handler) => {
   unauthorizedHandler = handler;
 };

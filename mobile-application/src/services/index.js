@@ -36,6 +36,7 @@ export const bookingService = {
     api.put(`/bookings/${bookingId}/cancel`, { cancellationReason }).then(unwrap),
   userPasses: (userId) => api.get(`/monthly-pass/user/${userId}`).then(unwrap),
   passDetails: (passId) => api.get(`/monthly-pass/details/${passId}`).then(unwrap),
+  passCertificatePath: (passId) => `/monthly-pass/download/${passId}`,
   cancelPass: (passId, reason) => api.post("/monthly-pass/cancel", { passId, reason }).then(unwrap),
   renewPass: (passId, durationMonths, paymentMethod) =>
     api.post("/monthly-pass/renew", { passId, durationMonths, paymentMethod }).then(unwrap),

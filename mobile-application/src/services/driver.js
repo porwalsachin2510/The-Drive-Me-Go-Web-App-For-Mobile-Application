@@ -31,6 +31,10 @@ export const managedDriverService = {
   updateLocation: (payload) => api.post("/driver/update-location", payload).then(unwrap),
 };
 
+export const driverEmergencyService = {
+  report: (tripId, payload) => api.post(`/driver/trips/${tripId}/emergency`, payload).then(unwrap),
+};
+
 export const employeeService = {
   dashboard: () => api.get("/corporate-employee-users/dashboard").then(unwrap),
   history: (params) => api.get("/travel-history/my-history", { params }).then(unwrap),

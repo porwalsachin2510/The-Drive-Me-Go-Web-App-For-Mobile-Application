@@ -8,6 +8,7 @@ import { Screen } from "../../src/components/Screen";
 import { AppHeader, resolveImage } from "../../src/components/AppHeader";
 import { Badge, Button, Card, EmptyState, Loading } from "../../src/components/ui";
 import { bookingService } from "../../src/services";
+import { downloadAndShare } from "../../src/utils/download";
 import { bookingStatusMeta, formatDateLong, formatMoney } from "../../src/utils/format";
 import { colors, radius, type } from "../../src/theme";
 
@@ -26,6 +27,13 @@ export default function BookingDetails() {
       qc.invalidateQueries({ queryKey: ["booking", id] });
     },
     onError: (e) => Alert.alert("Could not cancel", e?.response?.data?.message || "Please try again."),
+  });
+
+  const monthlyPassId = b.monthlyPassId?._id || b.monthlyPassId;
+  const download = useMutation({
+    mutationFn: () =>
+      downloadAndShare(bookingService.passCertificatePath(monthlyPassId), `monthly-pass-${monthlyPassId}.pdf`),
+    onError: (e) => Alert.alert("Download failed", e?.response?.data?.message || e?.message || "Please try again."),
   });
 
   const back = () => (router.canGoBack() ? router.back() : router.replace("/(tabs)/trips"));
@@ -61,7 +69,12 @@ export default function BookingDetails() {
     <Screen
       header={<AppHeader onBack={back} />}
       footer={
-        <View style={{ flexDirection: "row", gap: 12 }}>
+        <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap" }}>
+          {monthlyPassId ? (
+            <View style={{ flexBasis: "100%" }}>
+              <Button title="Download Pass Certificate" onPress={() => download.mutate()} loading={download.isPending} />
+            </View>
+          ) : null}
           {cancellable ? <View style={{ flex: 1 }}><Button title="Cancel Booking" variant="outline" onPress={confirmCancel} loading={cancel.isPending} /></View> : null}
           <View style={{ flex: 1 }}><Button title="Back to My Rides" variant={cancellable ? "outline" : "primary"} onPress={back} /></View>
         </View>
